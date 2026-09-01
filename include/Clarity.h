@@ -28,6 +28,10 @@ namespace Clarity
 		std::string message;              // shown to the player and kept for the settings page
 	};
 
+	// Writes settings::general::price onto the potion form (its gold value). Main thread only;
+	// called at load and whenever the setting changes.
+	void ApplyPrice();
+
 	// Removes every tree perk the player owns and refunds the points. Main thread only.
 	Result Refund();
 

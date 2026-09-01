@@ -23,7 +23,7 @@ namespace settings
 		struct Defaults
 		{
 			std::uint32_t logLevel;
-			bool enabled;
+			std::uint32_t price;
 		} defaults{};
 
 		std::string Lower(std::string a_s)
@@ -85,8 +85,8 @@ namespace settings
 				if (!a_parse(it->second, a_out)) { logger::warn("INI value \"{}\" for {} is not valid; keeping current value", it->second, a_key); }
 			};
 			get("uloglevel:debug", debug::logLevel, ParseUInt);
-			get("benabled:general", general::enabled, ParseBool);
-			logger::info("settings loaded from {}: enabled={} logLevel={}", iniPath, general::enabled, debug::logLevel);
+			get("uprice:general", general::price, ParseUInt);
+			logger::info("settings loaded from {}: price={} logLevel={}", iniPath, general::price, debug::logLevel);
 			return true;
 		}
 
@@ -116,12 +116,12 @@ namespace settings
 	{
 		iniPath = (std::filesystem::current_path() / "Data" / "SKSE" / "Plugins" / a_iniFileName).string();
 
-		defaults = { debug::logLevel, general::enabled };
+		defaults = { debug::logLevel, general::price };
 
 		auto* collection = utils::INISettingCollection::GetSingleton();
 		collection->AddSettings(
 			utils::MakeSetting("uLogLevel:Debug", static_cast<unsigned int>(debug::logLevel)),
-			utils::MakeSetting("bEnabled:General", general::enabled));
+			utils::MakeSetting("uPrice:General", static_cast<unsigned int>(general::price)));
 
 		LoadFileValues();
 	}
@@ -145,7 +145,7 @@ namespace settings
 
 		bool ok = true;
 		ok &= WriteKey(lines, "Debug", "uLogLevel", std::to_string(debug::logLevel));
-		ok &= WriteKey(lines, "General", "bEnabled", general::enabled ? "1" : "0");
+		ok &= WriteKey(lines, "General", "uPrice", std::to_string(general::price));
 
 		std::ofstream out(iniPath, std::ios::trunc);
 		if (!out) { logger::error("Save: could not open {} for writing", iniPath); return false; }
@@ -157,7 +157,7 @@ namespace settings
 	void RestoreDefaults()
 	{
 		debug::logLevel = defaults.logLevel;
-		general::enabled = defaults.enabled;
+		general::price = defaults.price;
 		ApplyLogLevel();
 	}
 

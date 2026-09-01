@@ -1,8 +1,8 @@
 #pragma once
 
 // Potion of Clarity - settings. Plain-file INI (redirector-proof, the project standard).
-// Deliberately tiny: the potion is the feature, and the only decision left to the player is
-// whether the mod is switched on.
+// Deliberately tiny (design decision 2026-09-01: the menu just controls how much the potion
+// costs): the potion is the feature, and its price is the one knob.
 
 #include <cstdint>
 #include <string>
@@ -16,7 +16,7 @@ namespace settings
 
 	namespace general
 	{
-		inline bool enabled = true;  // bEnabled:General - drinking the potion refunds perks
+		inline std::uint32_t price = 250;  // uPrice:General - the potion's gold value (what merchants charge)
 	}
 
 	void Init(const std::string& a_iniFileName);

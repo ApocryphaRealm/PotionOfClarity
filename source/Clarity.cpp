@@ -105,13 +105,6 @@ namespace Clarity
 					return RE::BSEventNotifyControl::kContinue;
 				}
 
-				if (!settings::general::enabled)
-				{
-					logger::info("Potion of Clarity consumed while the mod is disabled (bEnabled=0); no refund");
-					RE::DebugNotification("Potion of Clarity is disabled in its settings.");
-					return RE::BSEventNotifyControl::kContinue;
-				}
-
 				logger::info("Potion of Clarity consumed by the player");
 				const Result r = Refund();
 				RE::DebugNotification(r.message.c_str());
@@ -156,6 +149,7 @@ namespace Clarity
 		}
 		holder->AddEventSink<RE::TESEquipEvent>(EquipSink::GetSingleton());
 		g_sinkRegistered = true;
+		ApplyPrice();
 
 		{
 			std::scoped_lock l(g_stateLock);
@@ -164,6 +158,15 @@ namespace Clarity
 		}
 		logger::info("Potion of Clarity resolved from {} at 0x{:08X} (\"{}\"); consume sink registered",
 					 kPluginFileName, form->GetFormID(), form->GetName());
+	}
+
+	void ApplyPrice()
+	{
+		auto* alch = g_potion ? g_potion->As<RE::AlchemyItem>() : nullptr;
+		if (!alch) { return; }
+		alch->data.costOverride = static_cast<std::int32_t>(std::min<std::uint32_t>(settings::general::price, 1000000u));
+		alch->data.flags.set(RE::AlchemyItem::AlchemyFlag::kCostOverride);
+		logger::info("potion price set to {} gold", alch->data.costOverride);
 	}
 
 	Result Refund()

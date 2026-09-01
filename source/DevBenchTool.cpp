@@ -86,12 +86,12 @@ namespace DevBenchTool
 			const auto s = Clarity::GetState();
 			const std::string json = std::format(
 				"{{\"ok\":true,"
-				"\"settings\":{{\"enabled\":{},\"logLevel\":{},\"iniPath\":\"{}\"}},"
+				"\"settings\":{{\"price\":{},\"logLevel\":{},\"iniPath\":\"{}\"}},"
 				"\"runtime\":{{\"potionResolved\":{},\"potionFormId\":\"0x{:08X}\",\"spentPerks\":{},\"perkPoints\":{},"
-				"\"refunds\":{},\"lastMessage\":\"{}\"}}}}",
-				settings::general::enabled, settings::debug::logLevel, EscapeJson(settings::GetIniPath()),
+				"\"refunds\":{},\"lastMessage\":\"{}\",\"potionGoldValue\":{}}}}}",
+				settings::general::price, settings::debug::logLevel, EscapeJson(settings::GetIniPath()),
 				s.potionResolved, s.potionFormID, s.spentPerks, static_cast<int>(s.perkPoints), s.refunds,
-				EscapeJson(s.lastMessage));
+				EscapeJson(s.lastMessage), Clarity::GetPotion() ? Clarity::GetPotion()->GetGoldValue() : -1);
 			a_write(a_sink, json.c_str());
 		}
 	}

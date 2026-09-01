@@ -41,6 +41,7 @@ namespace UI
 				"igSetTooltipV",
 				"igSeparatorText",
 				"igCombo_Str_arr",
+				"igSliderFloat",
 				"igIsItemHovered",
 				"igButton",
 				"igSameLine",
@@ -84,24 +85,18 @@ namespace UI
 
 			ImGuiMCP::SeparatorText("Potion of Clarity");
 
-			ImGuiMCP::Toggle("Enabled", &general::enabled);
-			HelpMarker("Drinking a Potion of Clarity returns every perk you bought from the skill trees as perk points. Off: the potion does nothing.");
+			float price = static_cast<float>(general::price);
+			if (ImGuiMCP::SliderFloat("Price", &price, 0.0F, 5000.0F, "%.0f gold"))
+			{
+				general::price = static_cast<std::uint32_t>(std::clamp(price, 0.0F, 5000.0F) + 0.5F);
+				OnMainThread([]() { Clarity::ApplyPrice(); });
+			}
+			HelpMarker("How much a Potion of Clarity costs - its gold value, which is what merchants charge for it. Cook it yourself at any cookpot (Salt Pile + Frost Mirriam) and it costs nothing.");
 
 			const auto s = Clarity::GetState();
-			ImGuiMCP::Text("Spent perks: %u    Perk points: %d", s.spentPerks, static_cast<int>(s.perkPoints));
-
-			if (s.potionResolved)
-			{
-				ImGuiMCP::TextWrapped("Cook the potion at any cookpot: Salt Pile + Frost Mirriam. Alchemists may also trade it.");
-			}
-			else
+			if (!s.potionResolved)
 			{
 				ImGuiMCP::TextWrapped("PotionOfClarity.esl is not loaded - enable it in your mod manager or the potion cannot exist.");
-			}
-
-			if (!s.lastMessage.empty())
-			{
-				ImGuiMCP::TextDisabled("%s", s.lastMessage.c_str());
 			}
 		}
 

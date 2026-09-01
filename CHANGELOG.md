@@ -7,6 +7,14 @@ Rule 61: this mod's own history, kept beside the code it describes.
 > number; at `.9` the MINOR rolls. The next number is LAST WORKING + 1; failed/scratch/
 > untested numbers are reused. Numbers come from version-ledger.ps1 + set-version.ps1.
 
+## 1.0.1 - 2026-09-01 - working
+
+### Changed
+- The settings page now does one thing (design decision 2026-09-01): it sets how much the
+  potion costs. uPrice (default 250) is written onto the potion's gold value at load and on
+  change, so merchants charge and pay that amount. The Enabled toggle and the readouts are
+  gone - the potion is the feature.
+
 ## 1.0.0 - 2026-09-01 - working
 
 ### Added
