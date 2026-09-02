@@ -7,6 +7,13 @@ Rule 61: this mod's own history, kept beside the code it describes.
 > number; at `.9` the MINOR rolls. The next number is LAST WORKING + 1; failed/scratch/
 > untested numbers are reused. Numbers come from version-ledger.ps1 + set-version.ps1.
 
+## 1.0.2 - 2026-09-01 - working
+
+### Changed
+- The potion is no longer craftable (design decision 2026-09-01): the cookpot recipe record
+  is gone from PotionOfClarity.esl, which now holds just the inert effect and the potion.
+- Price: default 500 gold, slider range 0 to 1000 (was 250 / 0 to 5000).
+
 ## 1.0.1 - 2026-09-01 - working
 
 ### Changed

@@ -86,12 +86,12 @@ namespace UI
 			ImGuiMCP::SeparatorText("Potion of Clarity");
 
 			float price = static_cast<float>(general::price);
-			if (ImGuiMCP::SliderFloat("Price", &price, 0.0F, 5000.0F, "%.0f gold"))
+			if (ImGuiMCP::SliderFloat("Price", &price, 0.0F, 1000.0F, "%.0f gold"))
 			{
-				general::price = static_cast<std::uint32_t>(std::clamp(price, 0.0F, 5000.0F) + 0.5F);
+				general::price = static_cast<std::uint32_t>(std::clamp(price, 0.0F, 1000.0F) + 0.5F);
 				OnMainThread([]() { Clarity::ApplyPrice(); });
 			}
-			HelpMarker("How much a Potion of Clarity costs - its gold value, which is what merchants charge for it. Cook it yourself at any cookpot (Salt Pile + Frost Mirriam) and it costs nothing.");
+			HelpMarker("How much a Potion of Clarity costs - its gold value, which is what merchants charge for it (0 to 1000).");
 
 			const auto s = Clarity::GetState();
 			if (!s.potionResolved)

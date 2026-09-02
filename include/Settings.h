@@ -16,7 +16,7 @@ namespace settings
 
 	namespace general
 	{
-		inline std::uint32_t price = 250;  // uPrice:General - the potion's gold value (what merchants charge)
+		inline std::uint32_t price = 500;  // uPrice:General - the potion's gold value (what merchants charge); 0..1000
 	}
 
 	void Init(const std::string& a_iniFileName);

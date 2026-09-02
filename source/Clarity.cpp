@@ -15,7 +15,7 @@ namespace Clarity
 	namespace
 	{
 		// The contract with PotionOfClarity.esl (tools/Build-PotionOfClarityEsl.py):
-		// 0x800 MGEF (inert), 0x801 ALCH (the potion), 0x802 COBJ (cookpot recipe).
+		// 0x800 MGEF (inert), 0x801 ALCH (the potion). No recipe - the potion is not craftable.
 		constexpr const char* kPluginFileName = "PotionOfClarity.esl";
 		constexpr RE::FormID kPotionLocalFormID = 0x801;
 		constexpr std::uint32_t kSkillCount = 18;  // kOneHanded (6) .. kEnchanting (23), contiguous
@@ -164,7 +164,7 @@ namespace Clarity
 	{
 		auto* alch = g_potion ? g_potion->As<RE::AlchemyItem>() : nullptr;
 		if (!alch) { return; }
-		alch->data.costOverride = static_cast<std::int32_t>(std::min<std::uint32_t>(settings::general::price, 1000000u));
+		alch->data.costOverride = static_cast<std::int32_t>(std::min<std::uint32_t>(settings::general::price, 1000u));
 		alch->data.flags.set(RE::AlchemyItem::AlchemyFlag::kCostOverride);
 		logger::info("potion price set to {} gold", alch->data.costOverride);
 	}

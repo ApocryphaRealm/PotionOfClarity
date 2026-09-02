@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 r"""
 Build-PotionOfClarityEsl.py - authors PotionOfClarity.esl, the item carrier for Potion of
-Clarity. Three NEW records, one master (Skyrim.esm), light-flagged, no vanilla overrides:
+Clarity. Two NEW records, one master (Skyrim.esm), light-flagged, no vanilla overrides:
 
     0x800  MGEF  POC_ClarityEffect     inert placeholder effect (archetype Script, NO script)
     0x801  ALCH  POC_PotionOfClarity   the potion  (DLL contract: LookupForm(0x801, "PotionOfClarity.esl"))
-    0x802  COBJ  POC_RecipePotionOfClarity   cookpot recipe: Salt Pile + Frost Mirriam
 
+Design decision 2026-09-01: the potion is NOT craftable - no recipe record. It carries the
+VendorItemPotion keyword and a real gold value (default 500, set live from the DLL), so it
+exists for merchants and the console; how it enters the world is the DLL's business.
 Everything the potion DOES lives in PotionOfClarity.dll (it watches TESEquipEvent for this
-ALCH); the plugin only has to make the potion exist and be craftable. No VMAD anywhere.
+ALCH); the plugin only has to make the potion exist. No VMAD anywhere.
 Byte-level writer on the primitives proven by this project's earlier plugin builders; every
 vanilla FormID below was read out of the live Skyrim.esm by EDID, not guessed.
 
@@ -19,16 +21,12 @@ import struct, sys, os
 FORM_VER = 44
 NEW_MGEF = 0x01000800
 NEW_ALCH = 0x01000801
-NEW_COBJ = 0x01000802
 
 # --- vanilla references (Skyrim.esm, scanned by EDID 2026-09-01) ---
 KYWD_VendorItemPotion = 0x0008CDEC
-KYWD_CraftingCookpot  = 0x000A5CB3
 SNDR_ITMPotionUpSD    = 0x0003EDBD
 SNDR_ITMPotionDownSD  = 0x0003EDC0
 SNDR_ITMPotionUse     = 0x000B6435
-INGR_SaltPile         = 0x00034CDF
-INGR_FrostMirriam     = 0x00034D32
 
 BS = chr(92)
 ALCH_MODL = ('Clutter' + BS + 'Potions' + BS + 'PotionFortifyMagickaExtreme.nif\x00').encode('ascii')  # real vanilla mesh
@@ -77,27 +75,18 @@ def build():
             + sub('YNAM', struct.pack('<I', SNDR_ITMPotionUpSD))
             + sub('ZNAM', struct.pack('<I', SNDR_ITMPotionDownSD))
             + sub('DATA', struct.pack('<f', 0.5))                                   # weight
-            + sub('ENIT', struct.pack('<IIIII', 250, 0x00000001, 0, 0, SNDR_ITMPotionUse))  # value, No Auto-Calc
+            + sub('ENIT', struct.pack('<IIIII', 500, 0x00000001, 0, 0, SNDR_ITMPotionUse))  # value 500 (default price), No Auto-Calc
             + sub('EFID', struct.pack('<I', NEW_MGEF))
             + sub('EFIT', struct.pack('<fII', 0.0, 0, 0)))                          # magnitude, area, duration
 
-    cobj = (sub('EDID', b'POC_RecipePotionOfClarity\x00')
-            + sub('COCT', struct.pack('<I', 2))
-            + sub('CNTO', struct.pack('<II', INGR_SaltPile, 1))
-            + sub('CNTO', struct.pack('<II', INGR_FrostMirriam, 1))
-            + sub('CNAM', struct.pack('<I', NEW_ALCH))
-            + sub('BNAM', struct.pack('<I', KYWD_CraftingCookpot))
-            + sub('NAM1', struct.pack('<H', 1)))
+    assert b'VMAD' not in mgef + alch
 
-    assert b'VMAD' not in mgef + alch + cobj
-
-    # top-level groups in the engine's canonical order: MGEF < ALCH < COBJ
+    # top-level groups in the engine's canonical order: MGEF < ALCH
     body = (grup(b'MGEF', 0, rec('MGEF', NEW_MGEF, mgef))
-            + grup(b'ALCH', 0, rec('ALCH', NEW_ALCH, alch))
-            + grup(b'COBJ', 0, rec('COBJ', NEW_COBJ, cobj)))
+            + grup(b'ALCH', 0, rec('ALCH', NEW_ALCH, alch)))
 
-    num_records = 6  # 3 records + 3 groups, TES4 excluded
-    hedr = struct.pack('<fiI', 1.7, num_records, 0x803)
+    num_records = 4  # 2 records + 2 groups, TES4 excluded
+    hedr = struct.pack('<fiI', 1.7, num_records, 0x802)
     tes4_body = (sub('HEDR', hedr)
                  + sub('CNAM', b'ApocryphaRealm\x00')
                  + sub('SNAM', b'Potion of Clarity - item carrier. All behaviour is in PotionOfClarity.dll.\x00')
