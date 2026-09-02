@@ -28,6 +28,11 @@ namespace Clarity
 		std::string message;              // shown to the player and kept for the settings page
 	};
 
+	// Adds the potion to Elgrim's Elixirs' merchant chest (base form) so it is always in stock.
+	void StockElgrims();
+	// How many potions the chest's base form holds after StockElgrims (-1 = not applied).
+	std::int32_t GetElgrimsStock();
+
 	// Writes settings::general::price onto the potion form (its gold value). Main thread only;
 	// called at load and whenever the setting changes.
 	void ApplyPrice();

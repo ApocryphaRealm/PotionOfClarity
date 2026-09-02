@@ -3,6 +3,7 @@
 #include "Clarity.h"
 
 #include "Settings.h"
+#include "Sslr.h"
 #include "utils/Logger.h"
 
 #include <algorithm>
@@ -18,6 +19,14 @@ namespace Clarity
 		// 0x800 MGEF (inert), 0x801 ALCH (the potion). No recipe - the potion is not craftable.
 		constexpr const char* kPluginFileName = "PotionOfClarity.esl";
 		constexpr RE::FormID kPotionLocalFormID = 0x801;
+		// Elgrim's Elixirs (Riften) always stocks the potion - the original mod's guarantee, kept
+		// (design decision 2026-09-01). Done at runtime on the vanilla merchant chest's BASE form
+		// instead of an ESL override, so no plugin conflict is possible and load order is moot;
+		// base-form edits are not saved, so this runs every launch. The chest restocks from its
+		// base on the merchant's normal reset (an existing save sees it after the next reset).
+		constexpr RE::FormID kElgrimsChestFormID = 0x000A31AE;  // Skyrim.esm MerchantRiftenElgrimsElixirsChest
+		constexpr std::int32_t kElgrimsStock = 99;             // the original stocked 99
+		std::int32_t g_elgrimsCount = -1;
 		constexpr std::uint32_t kSkillCount = 18;  // kOneHanded (6) .. kEnchanting (23), contiguous
 
 		RE::TESBoundObject* g_potion = nullptr;
@@ -108,6 +117,13 @@ namespace Clarity
 				logger::info("Potion of Clarity consumed by the player");
 				const Result r = Refund();
 				RE::DebugNotification(r.message.c_str());
+				if (settings::general::sslrCompat && Sslr::IsDetected())
+				{
+					const auto sr = Sslr::RefundSkills();
+					RE::DebugNotification(sr.message.c_str());
+					std::scoped_lock l(g_stateLock);
+					g_state.lastMessage += " " + sr.message;
+				}
 				return RE::BSEventNotifyControl::kContinue;
 			}
 		};
@@ -150,6 +166,7 @@ namespace Clarity
 		holder->AddEventSink<RE::TESEquipEvent>(EquipSink::GetSingleton());
 		g_sinkRegistered = true;
 		ApplyPrice();
+		StockElgrims();
 
 		{
 			std::scoped_lock l(g_stateLock);
@@ -159,6 +176,25 @@ namespace Clarity
 		logger::info("Potion of Clarity resolved from {} at 0x{:08X} (\"{}\"); consume sink registered",
 					 kPluginFileName, form->GetFormID(), form->GetName());
 	}
+
+	void StockElgrims()
+	{
+		auto* chest = RE::TESForm::LookupByID<RE::TESObjectCONT>(kElgrimsChestFormID);
+		if (!chest || !g_potion)
+		{
+			logger::warn("Elgrim's Elixirs merchant chest 0x{:08X} not found; the potion will not be stocked there", kElgrimsChestFormID);
+			return;
+		}
+		const std::int32_t have = chest->CountObjectsInContainer(g_potion);
+		if (have < kElgrimsStock)
+		{
+			chest->AddObjectToContainer(g_potion, kElgrimsStock - have, nullptr);
+		}
+		g_elgrimsCount = chest->CountObjectsInContainer(g_potion);
+		logger::info("Elgrim's Elixirs merchant chest stocks {} Potion(s) of Clarity (base form, applied at load)", g_elgrimsCount);
+	}
+
+	std::int32_t GetElgrimsStock() { return g_elgrimsCount; }
 
 	void ApplyPrice()
 	{

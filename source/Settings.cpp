@@ -24,6 +24,7 @@ namespace settings
 		{
 			std::uint32_t logLevel;
 			std::uint32_t price;
+			bool sslrCompat;
 		} defaults{};
 
 		std::string Lower(std::string a_s)
@@ -86,7 +87,8 @@ namespace settings
 			};
 			get("uloglevel:debug", debug::logLevel, ParseUInt);
 			get("uprice:general", general::price, ParseUInt);
-			logger::info("settings loaded from {}: price={} logLevel={}", iniPath, general::price, debug::logLevel);
+			get("bsslrcompat:general", general::sslrCompat, ParseBool);
+			logger::info("settings loaded from {}: price={} sslrCompat={} logLevel={}", iniPath, general::price, general::sslrCompat, debug::logLevel);
 			return true;
 		}
 
@@ -116,12 +118,13 @@ namespace settings
 	{
 		iniPath = (std::filesystem::current_path() / "Data" / "SKSE" / "Plugins" / a_iniFileName).string();
 
-		defaults = { debug::logLevel, general::price };
+		defaults = { debug::logLevel, general::price, general::sslrCompat };
 
 		auto* collection = utils::INISettingCollection::GetSingleton();
 		collection->AddSettings(
 			utils::MakeSetting("uLogLevel:Debug", static_cast<unsigned int>(debug::logLevel)),
-			utils::MakeSetting("uPrice:General", static_cast<unsigned int>(general::price)));
+			utils::MakeSetting("uPrice:General", static_cast<unsigned int>(general::price)),
+			utils::MakeSetting("bSSLRCompat:General", general::sslrCompat));
 
 		LoadFileValues();
 	}
@@ -146,6 +149,7 @@ namespace settings
 		bool ok = true;
 		ok &= WriteKey(lines, "Debug", "uLogLevel", std::to_string(debug::logLevel));
 		ok &= WriteKey(lines, "General", "uPrice", std::to_string(general::price));
+		ok &= WriteKey(lines, "General", "bSSLRCompat", general::sslrCompat ? "1" : "0");
 
 		std::ofstream out(iniPath, std::ios::trunc);
 		if (!out) { logger::error("Save: could not open {} for writing", iniPath); return false; }
@@ -158,6 +162,7 @@ namespace settings
 	{
 		debug::logLevel = defaults.logLevel;
 		general::price = defaults.price;
+		general::sslrCompat = defaults.sslrCompat;
 		ApplyLogLevel();
 	}
 

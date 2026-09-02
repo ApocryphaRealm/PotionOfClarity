@@ -7,6 +7,25 @@ Rule 61: this mod's own history, kept beside the code it describes.
 > number; at `.9` the MINOR rolls. The next number is LAST WORKING + 1; failed/scratch/
 > untested numbers are reused. Numbers come from version-ledger.ps1 + set-version.ps1.
 
+## 1.0.4 - 2026-09-01 - working
+
+### Added
+- Static Skill Leveling Rewritten compatibility (bSSLRCompat, off by default; settings-page
+  toggle). With SSLR installed, drinking the potion also resets every trained skill to its
+  starting value (15 plus the racial bonus), zeroes its XP and returns the skill points SSLR
+  charged for the levels above it (per-level cost tiers from SSLR's own globals) to SSLR's
+  points pool - the global SSL_PointsLeftAfterLvlUp, plus the quest script's Int property on
+  variants that keep it there. Own code from the documented behaviour of SSLR and its Skill
+  Reset addon; nothing of theirs is used. Untrained skills are left alone.
+
+## 1.0.3 - 2026-09-01 - working
+
+### Added
+- Elgrim's Elixirs in Riften always stocks the potion (the original mod's guarantee, kept -
+  design decision 2026-09-01). Applied at runtime to the vanilla merchant chest's base form
+  (99 in stock, like the original) rather than as a plugin override, so no record conflict
+  is possible; an existing save sees it after the merchant's next restock.
+
 ## 1.0.2 - 2026-09-01 - working
 
 ### Changed

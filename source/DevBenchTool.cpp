@@ -5,6 +5,7 @@
 #include "Clarity.h"
 #include "DevBench/DevBenchAPI.h"
 #include "Settings.h"
+#include "Sslr.h"
 #include "utils/Logger.h"
 
 #include <format>
@@ -76,6 +77,14 @@ namespace DevBenchTool
 				a_write(a_sink, R"({"ok":true,"op":"refund"})");
 				return;
 			}
+			if (has("sslr:on")) { settings::general::sslrCompat = true; a_write(a_sink, R"({"ok":true,"op":"sslr:on"})"); return; }
+			if (has("sslr:off")) { settings::general::sslrCompat = false; a_write(a_sink, R"({"ok":true,"op":"sslr:off"})"); return; }
+			if (has("sslr:refund"))
+			{
+				if (auto* tasks = SKSE::GetTaskInterface()) { tasks->AddTask([]() { Sslr::RefundSkills(); }); }
+				a_write(a_sink, R"({"ok":true,"op":"sslr:refund"})");
+				return;
+			}
 			if (has("reload"))
 			{
 				const bool ok = settings::Reload();
@@ -86,12 +95,13 @@ namespace DevBenchTool
 			const auto s = Clarity::GetState();
 			const std::string json = std::format(
 				"{{\"ok\":true,"
-				"\"settings\":{{\"price\":{},\"logLevel\":{},\"iniPath\":\"{}\"}},"
+				"\"settings\":{{\"price\":{},\"sslrCompat\":{},\"logLevel\":{},\"iniPath\":\"{}\"}},"
 				"\"runtime\":{{\"potionResolved\":{},\"potionFormId\":\"0x{:08X}\",\"spentPerks\":{},\"perkPoints\":{},"
-				"\"refunds\":{},\"lastMessage\":\"{}\",\"potionGoldValue\":{}}}}}",
-				settings::general::price, settings::debug::logLevel, EscapeJson(settings::GetIniPath()),
+				"\"refunds\":{},\"lastMessage\":\"{}\",\"potionGoldValue\":{},\"elgrimsStock\":{},\"sslrDetected\":{},\"sslrPoints\":{},\"oneHandedBase\":{:.1f}}}}}",
+				settings::general::price, settings::general::sslrCompat, settings::debug::logLevel, EscapeJson(settings::GetIniPath()),
 				s.potionResolved, s.potionFormID, s.spentPerks, static_cast<int>(s.perkPoints), s.refunds,
-				EscapeJson(s.lastMessage), Clarity::GetPotion() ? Clarity::GetPotion()->GetGoldValue() : -1);
+				EscapeJson(s.lastMessage), Clarity::GetPotion() ? Clarity::GetPotion()->GetGoldValue() : -1, Clarity::GetElgrimsStock(), Sslr::IsDetected(), Sslr::GetPointsPool(),
+				RE::PlayerCharacter::GetSingleton() ? RE::PlayerCharacter::GetSingleton()->AsActorValueOwner()->GetBaseActorValue(RE::ActorValue::kOneHanded) : -1.0F);
 			a_write(a_sink, json.c_str());
 		}
 	}
@@ -113,7 +123,7 @@ namespace DevBenchTool
 			"{"
 			"\"description\":\"Potion of Clarity live state: settings, whether the potion resolved from the ESL, "
 			"owned tree perks, perk points, lifetime refunds. op=give adds one potion; op=drink consumes one through "
-			"the equip manager (the real path); op=refund refunds directly; op=reload re-reads the INI.\","
+			"the equip manager (the real path); op=refund refunds directly; op=sslr:on / sslr:off toggle SSLR compat; op=sslr:refund runs the SSLR skill refund alone; op=reload re-reads the INI.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"op\":{\"type\":\"string\"}}},"
 			"\"readOnly\":false"
 			"}";

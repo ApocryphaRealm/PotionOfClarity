@@ -7,6 +7,7 @@
 #include "Clarity.h"
 #include "DevBenchTool.h"
 #include "Settings.h"
+#include "Sslr.h"
 #include "UI.h"
 
 #include "utils/Logger.h"
@@ -23,6 +24,7 @@ namespace
 		case SKSE::MessagingInterface::kDataLoaded:
 			UI::Register();
 			Clarity::Install();
+			Sslr::Install();
 			DevBenchTool::Init(true);
 			break;
 		default:

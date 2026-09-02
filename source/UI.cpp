@@ -6,6 +6,7 @@
 
 #include "Clarity.h"
 #include "Settings.h"
+#include "Sslr.h"
 
 #include "utils/Logger.h"
 #include "utils/Toggle.h"
@@ -92,6 +93,14 @@ namespace UI
 				OnMainThread([]() { Clarity::ApplyPrice(); });
 			}
 			HelpMarker("How much a Potion of Clarity costs - its gold value, which is what merchants charge for it (0 to 1000).");
+
+			ImGuiMCP::Toggle("Static Skill Leveling Rewritten compatibility", &general::sslrCompat);
+			HelpMarker("With Static Skill Leveling Rewritten installed, drinking the potion also resets every trained skill to its starting value (15 plus your racial bonus) and returns the skill points SSLR charged for the levels above it to its pool, to spend again at your next level-up. Off: perks only.");
+			if (general::sslrCompat)
+			{
+				if (Sslr::IsDetected()) { ImGuiMCP::TextDisabled("SSLR detected - points pool: %d", Sslr::GetPointsPool()); }
+				else { ImGuiMCP::TextDisabled("SSLR not detected - the toggle does nothing until it is installed."); }
+			}
 
 			const auto s = Clarity::GetState();
 			if (!s.potionResolved)
