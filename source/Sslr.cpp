@@ -4,6 +4,7 @@
 
 #include "utils/Logger.h"
 
+#include <algorithm>
 #include <cmath>
 #include <format>
 
@@ -20,7 +21,7 @@ namespace Sslr
 		constexpr RE::FormID kQuest = 0xD7E;            // StaticSkillLevelingQuest
 		constexpr const char* kQuestScript = "StaticSkillLevelingQuestScript";
 		constexpr const char* kPointsProperty = "PointsLeftAfterLvlUp";
-		constexpr int kSkillBase = 15;                  // every skill starts at 15 before the racial bonus
+		constexpr int kSkillBase = 15;                  // fallback if the player's NPC record is unreadable
 		constexpr std::uint32_t kFirstSkill = 6;        // kOneHanded
 		constexpr std::uint32_t kSkillCount = 18;       // .. kEnchanting (23)
 
@@ -29,20 +30,31 @@ namespace Sslr
 		RE::TESGlobal* g_cost[4] = { nullptr, nullptr, nullptr, nullptr };
 		RE::TESQuest* g_quest = nullptr;
 
-		// A skill's untrained value: 15 plus the player's racial bonus for it. Only levels ABOVE
-		// this were bought with SSLR points, so only those are refunded (the Skill Reset addon
-		// resets to a flat 10 and refunds from there, which hands out points nobody spent).
+		// A skill's untrained value. Two readings, take the higher: (a) the player's own NPC record
+		// (DNAM skill base) - vanilla writes 15 there, but on a live character the game has been seen
+		// holding the race-adjusted start there already (20 for a Nord's One-Handed, gate 2026-09-01),
+		// and character-start mods may edit it; (b) 15 plus the RACE record's skill boost, which is
+		// how the game composes a fresh character's start (race overhauls and custom races edit it).
+		// max() is right in every observed case: 15+boost when DNAM is the vanilla 15, DNAM when it
+		// already includes the boost. Only levels ABOVE this were bought with SSLR points.
 		int StartingLevel(RE::PlayerCharacter* a_player, RE::ActorValue a_skill)
 		{
-			int floor = kSkillBase;
+			int fromRecord = kSkillBase;
+			const std::uint32_t index = static_cast<std::uint32_t>(a_skill) - kFirstSkill;
+			if (auto* base = a_player->GetActorBase(); base && index < RE::TESNPC::Skills::kTotal)
+			{
+				fromRecord = static_cast<int>(base->playerSkills.values[index]);
+			}
+			int fromRace = kSkillBase;
 			if (auto* race = a_player->GetRace())
 			{
 				for (const auto& boost : race->data.skillBoosts)
 				{
-					if (boost.skill.get() == a_skill) { floor += static_cast<int>(boost.bonus); }
+					if (boost.skill.get() == a_skill) { fromRace += static_cast<int>(boost.bonus); }
 				}
 			}
-			return floor;
+			logger::trace("SSLR: skill {} starting value: record {} / race {} -> {}", static_cast<int>(a_skill), fromRecord, fromRace, std::max(fromRecord, fromRace));
+			return std::max(fromRecord, fromRace);
 		}
 
 		int CostForLevel(int a_level)

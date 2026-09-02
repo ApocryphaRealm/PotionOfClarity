@@ -7,6 +7,13 @@ Rule 61: this mod's own history, kept beside the code it describes.
 > number; at `.9` the MINOR rolls. The next number is LAST WORKING + 1; failed/scratch/
 > untested numbers are reused. Numbers come from version-ledger.ps1 + set-version.ps1.
 
+## 1.0.5 - 2026-09-01 - working
+
+### Changed
+- SSLR refund floor now comes from the loaded forms instead of a fixed 15: the player
+  record's skill base (DNAM) plus the race record's skill boost. Race overhauls, custom
+  races and character-start mods that change starting skills are honoured automatically.
+
 ## 1.0.4 - 2026-09-01 - working
 
 ### Added
