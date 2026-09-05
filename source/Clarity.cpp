@@ -25,6 +25,23 @@ namespace Clarity
 		// base-form edits are not saved, so this runs every launch. The chest restocks from its
 		// base on the merchant's normal reset (an existing save sees it after the next reset).
 		constexpr RE::FormID kElgrimsChestFormID = 0x000A31AE;  // Skyrim.esm MerchantRiftenElgrimsElixirsChest
+
+		// CommonLibSSE-NG 7.2 removed TESObjectCONT::CountObjectsInContainer; count via ForEachContainerObject.
+		std::int32_t CountInContainer(RE::TESObjectCONT* a_cont, RE::TESBoundObject* a_obj)
+		{
+#if RUNTIME_LINE == 17
+			std::int32_t total = 0;
+			if (a_cont) {
+				a_cont->ForEachContainerObject([&](RE::ContainerObject& a_co) {
+					if (a_co.obj == a_obj) { total += a_co.count; }
+					return RE::BSContainer::ForEachResult::kContinue;
+				});
+			}
+			return total;
+#else
+			return a_cont ? a_cont->CountObjectsInContainer(a_obj) : 0;
+#endif
+		}
 		constexpr std::int32_t kElgrimsStock = 99;             // the original stocked 99
 		std::int32_t g_elgrimsCount = -1;
 		constexpr std::uint32_t kSkillCount = 18;  // kOneHanded (6) .. kEnchanting (23), contiguous
@@ -62,7 +79,12 @@ namespace Clarity
 			for (std::uint32_t i = 0; i < kSkillCount; ++i)
 			{
 				const auto av = static_cast<RE::ActorValue>(static_cast<std::uint32_t>(RE::ActorValue::kOneHanded) + i);
+				
+#if RUNTIME_LINE == 17
+				auto* info = RE::ActorValueList::GetActorValueInfo(av);
+#else
 				auto* info = avList->GetActorValue(av);
+#endif
 				if (!info || !info->perkTree) { continue; }
 				std::vector<RE::BGSSkillPerkTreeNode*> visited;
 				CollectNodePerks(info->perkTree, visited, perks);
@@ -116,11 +138,21 @@ namespace Clarity
 
 				logger::info("Potion of Clarity consumed by the player");
 				const Result r = Refund();
+				
+#if RUNTIME_LINE == 17
+				RE::SendHUDMessage::ShowHUDMessage(r.message.c_str(), nullptr, true);
+#else
 				RE::DebugNotification(r.message.c_str());
+#endif
 				if (settings::general::sslrCompat && Sslr::IsDetected())
 				{
 					const auto sr = Sslr::RefundSkills();
+					
+#if RUNTIME_LINE == 17
+					RE::SendHUDMessage::ShowHUDMessage(sr.message.c_str(), nullptr, true);
+#else
 					RE::DebugNotification(sr.message.c_str());
+#endif
 					std::scoped_lock l(g_stateLock);
 					g_state.lastMessage += " " + sr.message;
 				}
@@ -185,12 +217,12 @@ namespace Clarity
 			logger::warn("Elgrim's Elixirs merchant chest 0x{:08X} not found; the potion will not be stocked there", kElgrimsChestFormID);
 			return;
 		}
-		const std::int32_t have = chest->CountObjectsInContainer(g_potion);
+		const std::int32_t have = CountInContainer(chest, g_potion);
 		if (have < kElgrimsStock)
 		{
 			chest->AddObjectToContainer(g_potion, kElgrimsStock - have, nullptr);
 		}
-		g_elgrimsCount = chest->CountObjectsInContainer(g_potion);
+		g_elgrimsCount = CountInContainer(chest, g_potion);
 		logger::info("Elgrim's Elixirs merchant chest stocks {} Potion(s) of Clarity (base form, applied at load)", g_elgrimsCount);
 	}
 
