@@ -102,6 +102,14 @@ namespace UI
 				else { ImGuiMCP::TextDisabled("SSLR not detected - the toggle does nothing until it is installed."); }
 			}
 
+			ImGuiMCP::Toggle("Character Progression Control compatibility", &general::cpcCompat);
+			HelpMarker("With Character Progression Control installed and using skill points, drinking the potion also asks it to reset every trained skill to its starting value and return the points it charged to its bank. It does nothing otherwise. On by default.");
+			if (general::cpcCompat)
+			{
+				if (GetModuleHandleA("CharacterProgressionControl.dll")) { ImGuiMCP::Text("Character Progression Control detected."); }
+				else { ImGuiMCP::Text("Character Progression Control not detected - the toggle does nothing until it is installed."); }
+			}
+
 			const auto s = Clarity::GetState();
 			if (!s.potionResolved)
 			{

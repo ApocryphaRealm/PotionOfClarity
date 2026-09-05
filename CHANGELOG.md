@@ -7,6 +7,11 @@ Rule 61: this mod's own history, kept beside the code it describes.
 > number; at `.9` the MINOR rolls. The next number is LAST WORKING + 1; failed/scratch/
 > untested numbers are reused. Numbers come from version-ledger.ps1 + set-version.ps1.
 
+## 1.0.7 - 2026-09-05 - untested
+
+### Added
+- Character Progression Control compatibility, on by default: with that mod installed and using skill points, drinking the potion also asks it to reset every trained skill to its starting value and return the points it charged to its bank (an SKSE mod event, CPC_RefundSkillPoints; nothing happens when the mod is absent or its skill points are off).
+
 ## 1.0.6 - 2026-09-05 - untested
 
 ### Added

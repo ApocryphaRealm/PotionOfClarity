@@ -25,6 +25,7 @@ namespace settings
 			std::uint32_t logLevel;
 			std::uint32_t price;
 			bool sslrCompat;
+			bool cpcCompat;
 		} defaults{};
 
 		std::string Lower(std::string a_s)
@@ -88,7 +89,8 @@ namespace settings
 			get("uloglevel:debug", debug::logLevel, ParseUInt);
 			get("uprice:general", general::price, ParseUInt);
 			get("bsslrcompat:general", general::sslrCompat, ParseBool);
-			logger::info("settings loaded from {}: price={} sslrCompat={} logLevel={}", iniPath, general::price, general::sslrCompat, debug::logLevel);
+			get("bcpccompat:general", general::cpcCompat, ParseBool);
+			logger::info("settings loaded from {}: price={} sslrCompat={} cpcCompat={} logLevel={}", iniPath, general::price, general::sslrCompat, general::cpcCompat, debug::logLevel);
 			return true;
 		}
 
@@ -118,13 +120,14 @@ namespace settings
 	{
 		iniPath = (std::filesystem::current_path() / "Data" / "SKSE" / "Plugins" / a_iniFileName).string();
 
-		defaults = { debug::logLevel, general::price, general::sslrCompat };
+		defaults = { debug::logLevel, general::price, general::sslrCompat, general::cpcCompat };
 
 		auto* collection = utils::INISettingCollection::GetSingleton();
 		collection->AddSettings(
 			utils::MakeSetting("uLogLevel:Debug", static_cast<unsigned int>(debug::logLevel)),
 			utils::MakeSetting("uPrice:General", static_cast<unsigned int>(general::price)),
-			utils::MakeSetting("bSSLRCompat:General", general::sslrCompat));
+			utils::MakeSetting("bSSLRCompat:General", general::sslrCompat),
+			utils::MakeSetting("bCPCCompat:General", general::cpcCompat));
 
 		LoadFileValues();
 	}
@@ -150,6 +153,7 @@ namespace settings
 		ok &= WriteKey(lines, "Debug", "uLogLevel", std::to_string(debug::logLevel));
 		ok &= WriteKey(lines, "General", "uPrice", std::to_string(general::price));
 		ok &= WriteKey(lines, "General", "bSSLRCompat", general::sslrCompat ? "1" : "0");
+		ok &= WriteKey(lines, "General", "bCPCCompat", general::cpcCompat ? "1" : "0");
 
 		std::ofstream out(iniPath, std::ios::trunc);
 		if (!out) { logger::error("Save: could not open {} for writing", iniPath); return false; }
@@ -163,6 +167,7 @@ namespace settings
 		debug::logLevel = defaults.logLevel;
 		general::price = defaults.price;
 		general::sslrCompat = defaults.sslrCompat;
+		general::cpcCompat = defaults.cpcCompat;
 		ApplyLogLevel();
 	}
 

@@ -18,6 +18,7 @@ namespace settings
 	{
 		inline std::uint32_t price = 500;  // uPrice:General - the potion's gold value (what merchants charge); 0..1000
 		inline bool sslrCompat = false;    // bSSLRCompat:General - also refund Static Skill Leveling Rewritten skill points
+		inline bool cpcCompat = true;      // bCPCCompat:General - also ask Character Progression Control to refund its skill points (on by default; it does nothing unless that mod is loaded and using skill points)
 	}
 
 	void Init(const std::string& a_iniFileName);

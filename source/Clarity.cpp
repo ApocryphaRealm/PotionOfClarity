@@ -144,6 +144,20 @@ namespace Clarity
 #else
 				RE::DebugNotification(r.message.c_str());
 #endif
+				// Character Progression Control's skill points: that mod owns the bank and the cost tiers, so
+				// the potion only asks; it resets the skills and refunds its points itself (no-op unless its
+				// skill points are on). The request is an SKSE mod event, so no linking between the two mods.
+				if (settings::general::cpcCompat && GetModuleHandleA("CharacterProgressionControl.dll"))
+				{
+					if (auto* src = SKSE::GetModCallbackEventSource())
+					{
+						SKSE::ModCallbackEvent ev{ RE::BSFixedString("CPC_RefundSkillPoints"), RE::BSFixedString("PotionOfClarity"), 0.0F, player };
+						src->SendEvent(&ev);
+						logger::info("asked Character Progression Control to refund its skill points (CPC_RefundSkillPoints)");
+						std::scoped_lock l(g_stateLock);
+						g_state.lastMessage += " Character Progression Control asked to refund its skill points.";
+					}
+				}
 				if (settings::general::sslrCompat && Sslr::IsDetected())
 				{
 					const auto sr = Sslr::RefundSkills();
