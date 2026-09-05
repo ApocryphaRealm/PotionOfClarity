@@ -133,7 +133,25 @@ namespace Sslr
 			for (int level = floor; level < current; ++level) { thisSkill += CostForLevel(level); }
 			refund += thisSkill;
 			avOwner->SetBaseActorValue(av, static_cast<float>(floor));
-			if (skills && skills->data) { skills->data->skills[i].xp = 0.0F; }
+			if (skills && skills->data)
+			{
+				// The game caches each skill's level and next-level threshold here and recomputes them only
+				// when the skill levels up, so a reset rewrites them - otherwise the first level after the
+				// respec would still cost what the old, higher level cost. Threshold = improveMult x
+				// level^fSkillUseCurve + improveOffset (the AVIF's AVSK block).
+				auto& sd = skills->data->skills[i];
+				sd.level = static_cast<float>(floor);
+				sd.xp = 0.0F;
+				float curve = 1.95F;
+				if (auto* gs = RE::GameSettingCollection::GetSingleton()) { if (auto* s = gs->GetSetting("fSkillUseCurve")) { curve = s->GetFloat(); } }
+#if RUNTIME_LINE == 17
+				auto* info = RE::ActorValueList::GetActorValueInfo(av);
+#else
+				auto* list = RE::ActorValueList::GetSingleton();
+				auto* info = list ? list->GetActorValue(av) : nullptr;
+#endif
+				if (info && info->skill) { sd.levelThreshold = info->skill->improveMult * std::pow(static_cast<float>(floor), curve) + info->skill->improveOffset; }
+			}
 			++r.skillsReset;
 			logger::debug("SSLR: skill {} {} -> {} (starting value) refunds {} point(s)", static_cast<int>(av), current, floor, thisSkill);
 		}
