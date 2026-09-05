@@ -7,7 +7,7 @@ Rule 61: this mod's own history, kept beside the code it describes.
 > number; at `.9` the MINOR rolls. The next number is LAST WORKING + 1; failed/scratch/
 > untested numbers are reused. Numbers come from version-ledger.ps1 + set-version.ps1.
 
-## 1.0.8 - 2026-09-05 - untested
+## 1.0.8 - 2026-09-05 - working
 
 ### Fixed
 - The Static Skill Leveling Rewritten reset now also rewrites each reset skill's cached level and next-level threshold, so the first level after it costs what that level costs and not what the old, higher level cost.
