@@ -7,6 +7,7 @@
 #include "Settings.h"
 #include "Sslr.h"
 #include "utils/Logger.h"
+#include "utils/Strings.h"
 
 #include <format>
 #include <string>
@@ -91,6 +92,11 @@ namespace DevBenchTool
 				a_write(a_sink, std::format(R"({{"ok":{},"op":"reload"}})", ok ? "true" : "false").c_str());
 				return;
 			}
+			if (has("strings"))
+			{
+				a_write(a_sink, std::format(R"({{"ok":true,"op":"strings","strings":{}}})", strings::StatusJson()).c_str());
+				return;
+			}
 
 			const auto s = Clarity::GetState();
 			const std::string json = std::format(
@@ -123,7 +129,8 @@ namespace DevBenchTool
 			"{"
 			"\"description\":\"Potion of Clarity live state: settings, whether the potion resolved from the ESL, "
 			"owned tree perks, perk points, lifetime refunds. op=give adds one potion; op=drink consumes one through "
-			"the equip manager (the real path); op=refund refunds directly; op=sslr:on / sslr:off toggle SSLR compat; op=sslr:refund runs the SSLR skill refund alone; op=reload re-reads the INI.\","
+			"the equip manager (the real path); op=refund refunds directly; op=sslr:on / sslr:off toggle SSLR compat; op=sslr:refund runs the SSLR skill refund alone; op=reload re-reads the INI; "
+			"op=strings reports the active language, source and loaded translation count.\","
 			"\"inputSchema\":{\"type\":\"object\",\"properties\":{\"op\":{\"type\":\"string\"}}},"
 			"\"readOnly\":false"
 			"}";
