@@ -1,9 +1,9 @@
 ﻿{
     "name": "potionofclarity",
-    "version-string": "1.0.9",
+    "version-string": "1.1.0",
     "description": "Potion of Clarity - drink a potion, get every spent perk back as perk points.",
     "homepage": "https://github.com/ApocryphaRealm/PotionOfClarity",
-    "license": "MIT",
+    "license": "GPL-3.0-or-later",
     "dependencies": [
         "commonlibsse-ng",
         "spdlog"
