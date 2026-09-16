@@ -15,9 +15,9 @@ namespace Clarity
 {
 	namespace
 	{
-		// The contract with PotionOfClarity.esl (tools/Build-PotionOfClarityEsl.py):
+		// The contract with PotionOfClarity.esp (tools/Build-PotionOfClarityEsl.py):
 		// 0x800 MGEF (inert), 0x801 ALCH (the potion). No recipe - the potion is not craftable.
-		constexpr const char* kPluginFileName = "PotionOfClarity.esl";
+		constexpr const char* kPluginFileName = "PotionOfClarity.esp";
 		constexpr RE::FormID kPotionLocalFormID = 0x801;
 		// Elgrim's Elixirs (Riften) always stocks the potion - the original mod's guarantee, kept
 		// (design decision 2026-09-01). Done at runtime on the vanilla merchant chest's BASE form

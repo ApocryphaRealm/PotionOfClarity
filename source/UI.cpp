@@ -117,7 +117,7 @@ namespace UI
 			const auto s = Clarity::GetState();
 			if (!s.potionResolved)
 			{
-				ImGuiMCP::TextWrapped("%s", strings::TR("POC_EslNotLoaded", "PotionOfClarity.esl is not loaded - enable it in your mod manager or the potion cannot exist."));
+				ImGuiMCP::TextWrapped("%s", strings::TR("POC_EslNotLoaded", "PotionOfClarity.esp is not loaded - enable it in your mod manager or the potion cannot exist."));
 			}
 		}
 

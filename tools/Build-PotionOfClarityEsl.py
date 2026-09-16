@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 r"""
-Build-PotionOfClarityEsl.py - authors PotionOfClarity.esl, the item carrier for Potion of
+Build-PotionOfClarityEsl.py - authors PotionOfClarity.esp, the item carrier for Potion of
 Clarity. Two NEW records, one master (Skyrim.esm), light-flagged, no vanilla overrides:
 
     0x800  MGEF  POC_ClarityEffect     inert placeholder effect (archetype Script, NO script)
-    0x801  ALCH  POC_PotionOfClarity   the potion  (DLL contract: LookupForm(0x801, "PotionOfClarity.esl"))
+    0x801  ALCH  POC_PotionOfClarity   the potion  (DLL contract: LookupForm(0x801, "PotionOfClarity.esp"))
 
 Design decision 2026-09-01: the potion is NOT craftable - no recipe record. It carries the
 VendorItemPotion keyword and a real gold value (default 500, set live from the DLL), so it
@@ -96,7 +96,7 @@ def build():
 
 
 if __name__ == '__main__':
-    out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'dist', 'PotionOfClarity.esl')
+    out = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'dist', 'PotionOfClarity.esp')
     blob = build()
     os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
     open(out, 'wb').write(blob)

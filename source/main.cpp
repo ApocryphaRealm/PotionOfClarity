@@ -1,5 +1,5 @@
 // Potion of Clarity - own code, GPL-3.0-or-later (2026-09-01). Drink the potion, get every spent perk back
-// as perk points. The potion is an ALCH record in the tiny PotionOfClarity.esl that ships
+// as perk points. The potion is an ALCH record in the tiny PotionOfClarity.esp that ships
 // with this DLL; the refund itself is a plain main-thread edit of the player's perk list and
 // the game's own perk-point counter - no hooks, no relocations, no serialization.
 #include "PCH.h"
