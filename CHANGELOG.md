@@ -7,6 +7,11 @@ Rule 61: this mod's own history, kept beside the code it describes.
 > number; at `.9` the MINOR rolls. The next number is LAST WORKING + 1; failed/scratch/
 > untested numbers are reused. Numbers come from version-ledger.ps1 + set-version.ps1.
 
+## 1.1.1 - 2026-09-16 - untested
+
+### Changed
+- The plugin is now PotionOfClarity.esp, a light ESPFE instead of a .esl, so it sorts among ordinary plugins instead of being pinned to the top of the load order. A save that used the .esl will not find the potion; start from a save made before it, or re-add it.
+
 ## 1.0.9 - 2026-09-07 - working
 
 ### Added
